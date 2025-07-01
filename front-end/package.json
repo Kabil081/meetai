@@ -3,12 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "db:push": "drizzle-kit push --config=src/drizzle.config.ts",
-    "db:studio": "drizzle-kit stduio --config=src/drizzle.config.ts"
+    "db:studio": "drizzle-kit studio --config=src/drizzle.config.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.1.1",
@@ -47,6 +47,7 @@
     "dotenv": "^16.5.0",
     "drizzle-orm": "^0.43.1",
     "embla-carousel-react": "^8.6.0",
+    "framer-motion": "^12.19.2",
     "input-otp": "^1.4.2",
     "lucide-react": "^0.525.0",
     "next": "15.3.2",
