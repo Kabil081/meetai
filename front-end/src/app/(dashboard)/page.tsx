@@ -1,4 +1,4 @@
-import HomeView from "./modules/home/ui/views/homeviews"
+import HomeView from "../modules/home/ui/views/homeviews"
 import { Auth } from "better-auth"
 import { auth } from "@/lib/auth"
 import { headers } from "next/headers"
