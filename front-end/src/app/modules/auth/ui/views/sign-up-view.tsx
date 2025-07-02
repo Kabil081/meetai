@@ -11,6 +11,7 @@ import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "
 import { Alert,AlertTitle } from "@/components/ui/alert";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { FaGithub,FaGoogle } from "react-icons/fa";
 import { authClient } from "@/lib/auth-client";
 const formschema=z.object({
     name:z.string().min(1,{message:"Name cannot be empty"}),
@@ -47,6 +48,24 @@ const SignUpView=()=>{
                 onSuccess:()=>{
                     setPending(false);
                     Router.push("/");
+                },
+                onError:({error})=>{
+                    setError(error.message);
+                }
+            }
+        )
+    }
+    const onSocial=(provider: "google" | "github")=>{
+        setError(null);
+        setPending(true);
+        authClient.signIn.social(
+            {
+                provider:provider,
+                callbackURL:"/",
+            },
+            {
+                onSuccess:()=>{
+                    setPending(false);
                 },
                 onError:({error})=>{
                     setError(error.message);
@@ -156,10 +175,20 @@ const SignUpView=()=>{
                                     </span>
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
-                                    <Button disabled={pending} type="button"className="w-full cursor-pointer" variant="outline">
+                                    <Button disabled={pending} type="button"className="w-full cursor-pointer" variant="outline"
+                                         onClick={()=>{
+                                            onSocial("google")
+                                        }}
+                                    >
+                                        <FaGoogle className="h-4 w-4 mr-2"/>
                                         Google
                                     </Button>
-                                    <Button disabled={pending} type="button" className="w-full cursor-pointer" variant="outline">
+                                    <Button disabled={pending} type="button" className="w-full cursor-pointer" variant="outline"
+                                        onClick={()=>{
+                                            onSocial("github")
+                                        }}
+                                    >
+                                        <FaGithub className="h-4 w-4 mr-2"/>
                                         GitHub
                                     </Button>
                                 </div>
