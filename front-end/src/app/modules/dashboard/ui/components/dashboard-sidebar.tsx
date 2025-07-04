@@ -52,7 +52,7 @@ const secondSection=[
     }
 ]
 export const DashboardSidebar = () => {
-    const pathname="/agents"
+    const pathname="";
     return (
         <Sidebar className="bg-[oklch()]">
             <SidebarHeader className="text-sidebar-accent-foreground">
