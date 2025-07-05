@@ -1,4 +1,4 @@
-import { CommandDialog,CommandInput } from "@/components/ui/command"
+import { CommandResponsiveDialog,CommandInput } from "@/components/ui/command"
 import { CommandItem, CommandList } from "cmdk";
 import { Dispatch,SetStateAction } from "react"
 interface Props{
@@ -7,13 +7,16 @@ interface Props{
 }
 export const DashboardCommand = ({open,setOpen}:Props) => {
     return(
-        <CommandDialog open={open} onOpenChange={setOpen} className="w-full max-w-2xl">
+        <CommandResponsiveDialog open={open} onOpenChange={setOpen}>
             <CommandInput placeholder="Search agents..." className="w-full" />
             <CommandList>
                 <CommandItem>
                     Test
                 </CommandItem>
+                <CommandItem>
+                    Test2
+                </CommandItem>
             </CommandList>
-        </CommandDialog>
+        </CommandResponsiveDialog>
     )
 }

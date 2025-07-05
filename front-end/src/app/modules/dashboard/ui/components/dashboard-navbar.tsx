@@ -18,18 +18,9 @@ const DashboardNavbar=()=>{
                 setOpenCommand(!openCommand);
             }
         }
-        const logout=(e:KeyboardEvent)=>{
-            if(e.key=="Escape"){
-                e.preventDefault();
-                authClient.signOut();
-                Router.push("/login");
-            }
-        }
         document.addEventListener("keydown", down);
-        document.addEventListener("keydown", logout);
         return () => {
             document.removeEventListener("keydown", down);
-            document.removeEventListener("keydown", logout);
         }
     }, []);
     return(
