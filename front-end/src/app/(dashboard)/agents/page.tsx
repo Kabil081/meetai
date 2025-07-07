@@ -1,21 +1,35 @@
 import { AgentsView } from "@/app/modules/agents/ui/views/agents-view";
 import { LoadingState } from "@/components/loading-state";
-import {trpc,getQueryClient} from "@/trpc/server"
-import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
-import { ErrorBoundary } from "react-error-boundary";
-import { Suspense } from "react";
 import { ErrorState } from "@/components/error-state";
-const Page=()=>{
-    const queryClient=getQueryClient();
-    void queryClient.prefetchQuery(trpc.agents.getMany.queryOptions());
-    return(
-        <HydrationBoundary state={dehydrate(queryClient)}>
-            <Suspense fallback={<LoadingState title="Loading Agents" description="Please wait while we load the Agents."/>}>
-                <ErrorBoundary fallback={<ErrorState title="Error Loading Agents" description="Try Again Later"/>}>
-                    <AgentsView/>
-                </ErrorBoundary>
-            </Suspense>
-        </HydrationBoundary>
-    )
+import { AgentsListHeader } from "@/app/modules/agents/ui/views/agents-list-header";
+import { getQueryClient, trpc } from "@/trpc/server";
+import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
+import { Suspense } from "react";
+import { ErrorBoundary } from "react-error-boundary";
+import Loader from "@/components/loading-state";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
+export default async function Page(){
+  const session=await auth.api.getSession({
+    headers:await headers(),
+  })
+  if(!session){
+    redirect("/login");
+  }
+  const queryClient = getQueryClient();
+  await queryClient.prefetchQuery(trpc.agents.getMany.queryOptions());
+  const dehydratedState = dehydrate(queryClient);
+  return(
+    <>
+      <AgentsListHeader />
+      <HydrationBoundary state={dehydratedState}>
+        <Suspense fallback={<><LoadingState title="Loading Agents" description="Please wait while we load the Agents." />  <Loader/></>}>
+          <ErrorBoundary fallback={<ErrorState title="Error Loading Agents" description="Try Again Later" />}>
+            <AgentsView />
+          </ErrorBoundary>
+        </Suspense>
+      </HydrationBoundary>
+    </>
+  );
 }
-export default Page;

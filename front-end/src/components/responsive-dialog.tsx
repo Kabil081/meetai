@@ -1,61 +1,67 @@
 import {
-      Drawer,
-    DrawerPortal,
-    DrawerOverlay,
-    DrawerTrigger,
-    DrawerClose,
-    DrawerContent,
-    DrawerHeader,
-    DrawerFooter,
-    DrawerTitle,
-    DrawerDescription,
+  Drawer,
+  DrawerPortal,
+  DrawerOverlay,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerDescription,
 } from "@/components/ui/drawer"
 import {
-      Dialog,
-        DialogClose,
-        DialogContent,
-        DialogDescription,
-        DialogFooter,
-        DialogHeader,
-        DialogOverlay,
-        DialogPortal,
-        DialogTitle,
-        DialogTrigger,
-} from "@/components/ui/dialog";
-interface Props{
-    title:string,
-    description:string,
-    children:React.ReactNode,
-    open:boolean,
-    onOpenChange:(open:boolean)=>void,
-}
+  Dialog,
+  DialogPortal,
+  DialogOverlay,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog"
 import { useIsMobile } from "@/hooks/use-mobile";
-export const ResponsiveDialog=({title,description,children,open,onOpenChange}:Props)=>{
-    const isMobile=useIsMobile();
-    if(isMobile){
-        <Drawer open={open} onOpenChange={onOpenChange}>
-            <DrawerContent>
-                <DrawerHeader>
-                    <DrawerTitle>{title}</DrawerTitle>
-                    <DrawerTitle>{description}</DrawerTitle>
-                </DrawerHeader>
-                <div className="p-4 ">
-                    {children}
-                </div>
-            </DrawerContent>
-        </Drawer>
-    }
-    return(
-        <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent>
-                <DialogHeader>
-                    <DialogTitle>{title}</DialogTitle>
-                    <DialogDescription>{description}</DialogDescription>
-                </DialogHeader>
-                <div className="p-4">
-                    {children}
-                </div>
-            </DialogContent>
-        </Dialog>
-    )
+
+interface Props {
+  title: string;
+  description: string;
+  children: React.ReactNode;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
+
+export const ResponsiveDialog = ({ title, description, children, open, onOpenChange }: Props) => {
+  const isMobile = useIsMobile();
+
+  if (isMobile) {
+    return (
+      <Drawer open={open} onOpenChange={onOpenChange}>
+        <DrawerPortal>
+          <DrawerOverlay />
+          <DrawerContent className="max-w-md mx-auto w-full rounded-t-lg">
+            <DrawerHeader className="text-center">
+              <DrawerTitle>{title}</DrawerTitle>
+              <DrawerDescription>{description}</DrawerDescription>
+            </DrawerHeader>
+            <div className="flex flex-col items-center gap-4 py-4 px-6">
+              {children}
+            </div>
+          </DrawerContent>
+        </DrawerPortal>
+      </Drawer>
+    );
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogPortal>
+        <DialogOverlay />
+        <DialogContent className="max-w-md mx-auto w-full rounded-lg">
+          <DialogHeader className="text-center">
+            <DialogTitle>{title}</DialogTitle>
+            <DialogDescription>{description}</DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col items-center gap-4 py-4 px-6">
+            {children}
+          </div>
+        </DialogContent>
+      </DialogPortal>
+    </Dialog>
+  );
+};
