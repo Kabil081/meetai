@@ -10,7 +10,9 @@ import { useAgentsFilter } from "../../hooks/use-agents-filters";
 import { Filter } from "lucide-react";
 import { Values, ParserBuilder } from "nuqs";
 import { DataPagination } from "./data-pagination"
+import { useRouter } from "next/navigation";
 export const AgentsView = () => {
+    const router=useRouter();
     const [Filters,setFilters]=useAgentsFilter();
     const trpc = useTRPC();
     const { data } = useSuspenseQuery(trpc.agents.getMany.queryOptions({
@@ -18,7 +20,11 @@ export const AgentsView = () => {
     }));
     return (
         <div className="flex-1 pb-4 px-4 md:px-8 flex flex-col gap-y-4 font-medium">
-            <DataTable columns={columns} data={data.items} />
+            <DataTable 
+            columns={columns} 
+            data={data.items} 
+            onRowClick={(row: { id: string }) => router.push(`/agents/${row.id}`)}
+            />
             <DataPagination
             page={Filters.page}
             totalPages={data.totalPages}

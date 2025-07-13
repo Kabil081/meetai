@@ -35,6 +35,5 @@ export default function RootLayout({
         </html>
       </TRPCReactProvider>
     </NuqsAdapter>
-
   );
 }
