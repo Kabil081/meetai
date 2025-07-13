@@ -6,8 +6,7 @@ import { GeneratedAvatar } from "@/components/generated-avatar"
 import { CornerDownRightIcon } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { VideoIcon } from "lucide-react"
-// This type is used to define the shape of our data.
-// You can use a Zod schema here if you want.
+
 export type Payment = {
   id: string
   amount: number
@@ -45,7 +44,7 @@ export const columns: ColumnDef<AgentGetOne>[] = [
       return(
         <Badge variant="outline" className="flex items-center gap-x-2 [&>svg]:size-4">
           <VideoIcon className="text-blue-700"/>
-          5 meetings
+          {agent.meetingCount}{agent.meetingCount===1?" meeting":" meetings"}
         </Badge>
         
       )

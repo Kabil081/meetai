@@ -20,7 +20,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Loader from "@/components/loading-state";
-interface AgentFormProps {
+import { useAgentsFilter } from "../../hooks/use-agents-filters";
+interface AgentFormProps{
         onSuccess?: () => void;
         onError?: () => void;
         initialValues?: AgentGetOne;
@@ -30,11 +31,12 @@ export const AgentForm=({onSuccess,onError,initialValues,}:AgentFormProps)=>{
         const trpc= useTRPC();
         const router = useRouter();
         const queryClient = useQueryClient();
+        const [Filters]=useAgentsFilter();
         const createAgentMutation = useMutation(
                 trpc.agents.create.mutationOptions({
                         onSuccess:()=>{
                             queryClient.invalidateQueries(
-                                trpc.agents.getMany.queryOptions(),
+                                trpc.agents.getMany.queryOptions({}),
                             )
                             if(initialValues?.id){
                                 queryClient.invalidateQueries(

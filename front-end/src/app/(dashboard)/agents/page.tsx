@@ -10,15 +10,21 @@ import Loader from "@/components/loading-state";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-export default async function Page(){
+import { loadParams, useAgentsFilter } from "./params"
+import { SearchParams } from "nuqs";
+interface Props{
+  searchParams:Promise<SearchParams>
+}
+const Page=async ({searchParams}:Props)=>{
   const session=await auth.api.getSession({
     headers:await headers(),
   })
+  const Filters=await loadParams(searchParams);
   if(!session){
     redirect("/login");
   }
   const queryClient = getQueryClient();
-  await queryClient.prefetchQuery(trpc.agents.getMany.queryOptions());
+  void queryClient.prefetchQuery(trpc.agents.getMany.queryOptions({...Filters}));
   const dehydratedState = dehydrate(queryClient);
   return(
     <>
@@ -33,4 +39,4 @@ export default async function Page(){
     </>
   );
 }
-
+export default Page;

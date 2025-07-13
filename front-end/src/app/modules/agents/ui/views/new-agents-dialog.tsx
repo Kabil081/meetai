@@ -1,7 +1,7 @@
 import { ResponsiveDialog } from "@/components/responsive-dialog"
 import { on } from "events";
 import { Agent } from "http";
-interface Props {
+interface Props{
     open: boolean;
     onOpenChange: (open: boolean) => void;
 }
