@@ -47,10 +47,8 @@ export const AgentIdViewHeader=({agentId,agentName,onEdit,onRemove}:Props)=>{
                     <BreadcrumbSeparator>
                         <ChevronRightIcon/>
                     </BreadcrumbSeparator>
-                    <BreadcrumbLink>
-                        <Link href={`/agents/${agentId}`}>
+                    <BreadcrumbLink href={`/agents/${agentId}`}>
                         {agentName}
-                        </Link>
                     </BreadcrumbLink>
                 </BreadcrumbList>
             </Breadcrumb>
