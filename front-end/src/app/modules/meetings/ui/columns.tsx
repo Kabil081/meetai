@@ -1,10 +1,19 @@
 "use client"
-
+import { format } from "date-fns";
+import humanizeDuration  from "humanize-duration"
 import { ColumnDef } from "@tanstack/react-table"
 import { GeneratedAvatar } from "@/components/generated-avatar"
-import { CornerDownRightIcon } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { VideoIcon } from "lucide-react"
+import {
+  CircleCheckIcon,
+  CircleXIcon,
+  ClockArrowUpIcon,
+  ClockFadingIcon,
+  CornerDownRightIcon,
+  LoaderIcon
+} from "lucide-react";
+import { cn } from "@/lib/utils";
 import { MeetinGetOne } from "../types"
 export type Payment = {
   id: string
@@ -36,16 +45,74 @@ export const columns: ColumnDef<MeetinGetOne>[] = [
     }
   },
   {
-    accessorKey:"MeetingCount",
-    header:"Meetings",
-    cell:({row})=>{
+    accessorKey: "status",
+    header: "Status & Duration",
+    cell: ({ row }) => {
       const meeting = Array.isArray(row.original) ? row.original[0] : row.original;
-      return(
-        <Badge variant="outline" className="flex items-center gap-x-2 [&>svg]:size-4">
-          <VideoIcon className="text-blue-700"/>
-        </Badge>
-        
-      )
-    }
-  }
+      // Status icon logic
+      let statusIcon = null;
+      let statusColor = "";
+      switch (meeting.status) {
+        case "completed":
+          statusIcon = <CircleCheckIcon className="text-green-600" />;
+          statusColor = "text-green-600";
+          break;
+        case "cancelled":
+          statusIcon = <CircleXIcon className="text-red-600" />;
+          statusColor = "text-red-600";
+          break;
+        case "active":
+        case "in_progress":
+          statusIcon = <LoaderIcon className="animate-spin text-blue-600" />;
+          statusColor = "text-blue-600";
+          break;
+        case "upcoming":
+        default:
+          statusIcon = <ClockArrowUpIcon className="text-muted-foreground" />;
+          statusColor = "text-muted-foreground";
+      }
+      // Duration logic
+      let durationBox = null;
+      if (!meeting.startedAt) {
+        durationBox = (
+          <div className="flex items-center gap-x-2">
+            <ClockFadingIcon className="text-muted-foreground" />
+            <span className="text-muted-foreground">No duration</span>
+            <button className="ml-2 px-2 py-1 bg-blue-600 text-white rounded text-xs">Get Started</button>
+          </div>
+        );
+      } else if (meeting.startedAt && meeting.endedAt) {
+        // Calculate duration in ms
+        const durationMs = new Date(meeting.endedAt).getTime() - new Date(meeting.startedAt).getTime();
+        let durationStr = "";
+        try {
+          durationStr = humanizeDuration(durationMs, { largest: 2, round: true });
+        } catch {
+          durationStr = `${Math.round(durationMs / 60000)} min`;
+        }
+        durationBox = (
+          <div className="flex items-center gap-x-2">
+            <ClockFadingIcon className="text-blue-600" />
+            <span className="text-blue-600">{durationStr}</span>
+          </div>
+        );
+      } else {
+        durationBox = (
+          <div className="flex items-center gap-x-2">
+            <ClockFadingIcon className="text-yellow-600" />
+            <span className="text-yellow-600">Ongoing</span>
+          </div>
+        );
+      }
+      return (
+        <div className="flex flex-col gap-y-1">
+          <div className={cn("flex items-center gap-x-2 font-medium", statusColor)}>
+            {statusIcon}
+            <span className="capitalize">{meeting.status}</span>
+          </div>
+          {durationBox}
+        </div>
+      );
+    },
+  },
 ]

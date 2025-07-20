@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "humanize-duration": "^3.33.0"
+  },
+  "devDependencies": {
+    "@types/humanize-duration": "^3.27.4"
+  }
+}
