@@ -7,7 +7,34 @@ import { z } from "zod";
 import { eq } from "drizzle-orm";
 import { count,desc,sql,getTableColumns,and,ilike } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
+import { MeetingsSchema, MeetingsUpdateSchema } from "./schema";
 export const MeetingsRouter = createTRPCRouter({
+  update:ProtectedProcedure
+           .input(MeetingsUpdateSchema)
+           .mutation(async({input,ctx})=>{
+              const[removedMeeting]=await db.update(meetings).set(input).where(
+                and(
+                  eq(meetings.id, input.id),
+                  eq(meetings.userId, ctx.auth.user.id)
+                )
+              ).returning();
+              if(!removedMeeting){
+                throw new TRPCError({code:"NOT_FOUND",message:"Agent Not Found"});
+              }
+  }),
+  create: ProtectedProcedure
+      .input(MeetingsSchema)
+      .mutation(async ({ input, ctx }) => {
+        const { auth } = ctx as { auth: { user: { id: string } } };
+        const [createdMeeting] = await db
+          .insert(meetings) 
+          .values({
+            ...input,
+            userId: auth.user.id,
+          })
+          .returning();
+        return createdMeeting;
+  }),
   getOne: ProtectedProcedure.input(z.object({id:z.string()})).query(async({input,ctx})=>{  
     const [data]=await db.select(
       {

@@ -1,13 +1,11 @@
-import { AgentGetOne } from "../../types";
 import { useRouter } from "next/navigation";
-import { queryOptions, useQueryClient } from "@tanstack/react-query";
+import { queryOptions, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTRPC } from "@/trpc/client";
 import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
-import { AgentSchema } from "../../server/schema";
+import { MeetingsSchema } from "../server/schema";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { GeneratedAvatar } from "@/components/generated-avatar";
 import {
     Form,
     FormItem,
@@ -16,39 +14,44 @@ import {
     FormMessage,
     FormField
 } from "@/components/ui/form"; 
-import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-
-interface AgentFormProps {
-    onSuccess?: () => void;
+import { MeetinGetOne } from "../types";
+import { useState } from "react";
+interface MeetingFormProps{
+    onSuccess?: (id?:string) => void;
     onError?: () => void;
-    initialValues?: AgentGetOne; 
+    onCancel?: () => void;
+    initialValues?: MeetinGetOne;
 }
-
-export const AgentForm = ({ onSuccess, onError, initialValues }: AgentFormProps) => {
+import { CommandSelect } from "@/components/command-select";
+import { GeneratedAvatar } from "@/components/generated-avatar";
+export const MeetingForm = ({ onSuccess, onError,onCancel,initialValues }: MeetingFormProps) => {
     const trpc = useTRPC();
     const queryClient = useQueryClient();
-
-    const createAgentMutation = useMutation(
-        trpc.agents.create.mutationOptions({
-            onSuccess: () => {
-                queryClient.invalidateQueries(trpc.agents.getMany.queryOptions({}));
-                onSuccess?.();
+    const createMeetingMutation = useMutation(
+        trpc.meetings.create.mutationOptions({
+            onSuccess: async (data) => {
+                queryClient.invalidateQueries(trpc.meetings.getMany.queryOptions({}));
+                onSuccess?.(data.id);
             },
             onError: () => {
                 onError?.();
             }
         })
     );
-
-    const updateAgentMutation = useMutation(
-        trpc.agents.update.mutationOptions({
+    const [open,setOpen]=useState("");
+    const[agentSearch,setagentSearch]=useState("");
+    const agents=useQuery(
+        trpc.agents.getMany.queryOptions({pageSize:100,search:agentSearch}),
+    )
+    const updateMeetingMutation = useMutation(
+        trpc.meetings.update.mutationOptions({
             onSuccess: () => {
-                queryClient.invalidateQueries(trpc.agents.getMany.queryOptions({}));
-                if (initialValues?.id) {
+                queryClient.invalidateQueries(trpc.meetings.getMany.queryOptions({}));
+                if(initialValues? initialValues[0].id:null) {
                     queryClient.invalidateQueries(
-                        trpc.agents.getOne.queryOptions({ id: initialValues.id })
+                        trpc.meetings.getOne.queryOptions({ id: initialValues?initialValues[0].id:""})
                     );
                 }
                 onSuccess?.();
@@ -59,29 +62,25 @@ export const AgentForm = ({ onSuccess, onError, initialValues }: AgentFormProps)
         })
     );
 
-    const form = useForm<z.infer<typeof AgentSchema>>({
-        resolver: zodResolver(AgentSchema),
+    const form = useForm<z.infer<typeof MeetingsSchema>>({
+        resolver: zodResolver(MeetingsSchema),
         defaultValues: {
-            name: initialValues?.name ?? "",
-            instruction: initialValues?.instrcuctions ?? "",
+            name: initialValues? initialValues[0].name :"",
+            agentId: initialValues? initialValues[0].agentId : "",
         }
     });
-    const isEditMode = !!initialValues?.id;
-    const isPending = createAgentMutation.isPending || updateAgentMutation.isPending;
+    const isEditMode = !!initialValues? initialValues[0].id:"";
+    const isPending = createMeetingMutation.isPending || updateMeetingMutation.isPending;
 
-    const onSubmit = (values: z.infer<typeof AgentSchema>) => {
+    const onSubmit = (values: z.infer<typeof MeetingsSchema>) => {
         if (isEditMode) {
-            updateAgentMutation.mutate({
+            updateMeetingMutation.mutate({
                 ...values,
-                id: initialValues.id
+                id: initialValues? initialValues[0].id:""
             });
         } else {
-            createAgentMutation.mutate(values);
+            createMeetingMutation.mutate(values);
         }
-    };
-
-    const onCancel = () => {
-        form.reset();
     };
 
     return (
@@ -91,9 +90,8 @@ export const AgentForm = ({ onSuccess, onError, initialValues }: AgentFormProps)
                 onSubmit={form.handleSubmit(onSubmit)}
             >
                 <div className="flex flex-col items-center mb-4">
-                    <GeneratedAvatar seed={form.watch("name")} />
                     <span className="text-lg font-semibold text-primary-700 dark:text-primary-300">
-                        {form.watch("name") || "New Agent"}
+                        {form.watch("name") || "New Meeting"}
                     </span>
                 </div>
 
@@ -103,11 +101,11 @@ export const AgentForm = ({ onSuccess, onError, initialValues }: AgentFormProps)
                     render={({ field }) => (
                         <FormItem>
                             <FormLabel className="text-base font-medium text-zinc-700 dark:text-zinc-200">
-                                Agent Name
+                                Meeting Name
                             </FormLabel>
                             <FormControl>
                                 <Input
-                                    placeholder="Enter Agent Name"
+                                    placeholder="Enter Meeting Name"
                                     {...field}
                                     disabled={isPending}
                                     className="rounded-lg border-zinc-300 dark:border-zinc-700 focus:ring-primary-500 w-full text-base"
@@ -117,23 +115,30 @@ export const AgentForm = ({ onSuccess, onError, initialValues }: AgentFormProps)
                         </FormItem>
                     )}
                 />
-
                 <FormField
                     control={form.control}
-                    name="instruction"
+                    name="agentId"
                     render={({ field }) => (
                         <FormItem>
                             <FormLabel className="text-base font-medium text-zinc-700 dark:text-zinc-200">
-                                Instructions
+                                Agent
                             </FormLabel>
-                            <FormControl>
-                                <Textarea
-                                    placeholder="Enter Instructions"
-                                    {...field}
-                                    disabled={isPending}
-                                    className="rounded-lg border-zinc-300 dark:border-zinc-700 focus:ring-primary-500 w-full text-base min-h-[120px]"
-                                />
-                            </FormControl>
+                            <CommandSelect
+                                options={(agents.data ? agents.data.items : []).map((agent: { id: string; name: string; }) => ({
+                                    id: agent.id,
+                                    value: agent.id,
+                                    children: (
+                                        <div className="flex items-center gap-2 rounded-full">
+                                            <GeneratedAvatar seed={agent.id} size={32} />
+                                            <span>{agent.name}</span>
+                                        </div>
+                                    )
+                                }))}
+                                onSelect={field.onChange}
+                                onSearch={setagentSearch}
+                                value={field.value}
+                                placeholder="select an Agent"
+                            />
                             <FormMessage />
                         </FormItem>
                     )}
